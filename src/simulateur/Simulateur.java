@@ -1,4 +1,5 @@
 package simulateur;
+import convertisseurs.ConvertisseurNRZ;
 import destinations.Destination;
 import destinations.DestinationFinale;
 import information.Information;
@@ -41,6 +42,10 @@ public class Simulateur {
    	
     /** le  composant Source de la chaine de transmission */
     private Source <Boolean>  source = null;
+
+
+    /** le  composant ConvertisseurNRZ de la chaine de transmission */
+    private ConvertisseurNRZ <Boolean,Double> convertisseur = null;
     
     /** le  composant Transmetteur parfait logique de la chaine de transmission */
     private Transmetteur <Boolean, Boolean>  transmetteurLogique = null;
@@ -65,12 +70,15 @@ public class Simulateur {
     	// analyser et récupérer les arguments   	
     	analyseArguments(args);
       
-        source=new SourceFixe();
+        source=new SourceAleatoire();
+        convertisseur = new ConvertisseurNRZ(-5,5,0.1,0.01);
         destination = new DestinationFinale();
         
         transmetteurLogique = new TransmetteurParfait();
         
-        source.connecter(transmetteurLogique);
+        source.connecter(convertisseur);
+        convertisseur.connecter(transmetteurLogique);
+
         transmetteurLogique.connecter(destination);
 
         
