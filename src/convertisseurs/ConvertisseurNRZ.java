@@ -1,20 +1,19 @@
 package convertisseurs;
 
-import destinations.DestinationInterface;
 import information.Information;
 import information.InformationNonConformeException;
 
-public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Double>{
+public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
 
-    private double vMin;
-    private double vMax;
-    private double tpSymbole;
-    private double pasEchantillonage;
+    private float vMin;
+    private float vMax;
+    private float tpSymbole;
+    private float pasEchantillonage;
 
     /**
      * Une convertisseur qui envoie toujours le même message
      */
-    public ConvertisseurNRZ (double vMin, double vMax, double tpSymbole, double pasEchantillonage) {
+    public ConvertisseurNRZ (float vMin, float vMax, float tpSymbole, float pasEchantillonage) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
@@ -25,7 +24,7 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Double>{
 
     public void recevoir(Information<Boolean> information) throws InformationNonConformeException {
         this.informationRecue = information;
-        this.informationEmise = new Information<Double>();
+        this.informationEmise = new Information<Float>();
         for (int i = 0; i < information.nbElements(); i++) {
             if (information.iemeElement(i)) {
                 for (int j = 0; j < tpSymbole/pasEchantillonage; j++) {
@@ -46,7 +45,7 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Double>{
     }
 
     @Override
-    public Information<Double> getInformationEmise() {
+    public Information<Float> getInformationEmise() {
         return this.informationEmise;
     }
 

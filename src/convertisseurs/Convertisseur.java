@@ -1,6 +1,7 @@
 package convertisseurs;
 
 import information.*;
+import sources.SourceInterface;
 import destinations.DestinationInterface;
 import java.util.*;
 
@@ -9,7 +10,7 @@ import java.util.*;
  * éléments sont de type T
  * @author prou
  */
-public  abstract class Convertisseur <R,E> implements  ConvertisseurInterface <R,E> {
+public  abstract class Convertisseur <R,E> implements  DestinationInterface <R>, SourceInterface <E> {
    
     /** 
      * la liste des composants destination connectés

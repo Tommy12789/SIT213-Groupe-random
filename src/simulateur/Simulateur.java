@@ -2,13 +2,17 @@ package simulateur;
 import convertisseurs.ConvertisseurNRZ;
 import destinations.Destination;
 import destinations.DestinationFinale;
+import destinations.DestinationFinaleAnalogique;
 import information.Information;
 import information.InformationNonConformeException;
 import sources.Source;
 import sources.SourceAleatoire;
 import sources.SourceFixe;
+import transmetteurs.FLoat;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurParfait;
+import transmetteurs.TransmetteurParfaitAnalogique;
+import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
 
 
@@ -48,10 +52,10 @@ public class Simulateur {
     private ConvertisseurNRZ <Boolean,Double> convertisseur = null;
     
     /** le  composant Transmetteur parfait logique de la chaine de transmission */
-    private Transmetteur <Boolean, Boolean>  transmetteurLogique = null;
+    private Transmetteur<Float, Float>  transmetteurLogique = null;
     
     /** le  composant Destination de la chaine de transmission */
-    private Destination <Boolean>  destination = null;
+    private Destination<Float>  destination = null;
    	
    
     /** Le constructeur de Simulateur construit une chaîne de
@@ -71,10 +75,10 @@ public class Simulateur {
     	analyseArguments(args);
       
         source=new SourceAleatoire();
-        convertisseur = new ConvertisseurNRZ(-5,5,0.1,0.01);
-        destination = new DestinationFinale();
+        convertisseur = new ConvertisseurNRZ(0.0f, 1.0f, 0.1f, 0.01f);
+        destination = new DestinationFinaleAnalogique();
         
-        transmetteurLogique = new TransmetteurParfait();
+        transmetteurLogique = new TransmetteurParfaitAnalogique();
         
         source.connecter(convertisseur);
         convertisseur.connecter(transmetteurLogique);
@@ -82,8 +86,8 @@ public class Simulateur {
         transmetteurLogique.connecter(destination);
 
         
-        source.connecter(new SondeLogique("Source", 200));
-        transmetteurLogique.connecter(new SondeLogique("Transmetteur", 200));
+        source.connecter(new SondeAnalogique("Source" ));
+        transmetteurLogique.connecter(new SondeAnalogique("Transmetteur" ));
        
       		
     }

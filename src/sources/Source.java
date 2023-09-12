@@ -1,6 +1,7 @@
 package sources;
 
 import information.*;
+import visualisations.SondeAnalogique;
 import destinations.DestinationInterface;
 import java.util.*;
 
@@ -46,10 +47,10 @@ public  abstract class Source <T> implements  SourceInterface <T> {
    
     /**
      * connecte une destination à la source
-     * @param destination  la destination à connecter
+     * @param sondeAnalogique  la destination à connecter
      */
-    public void connecter (DestinationInterface <T> destination) {
-	destinationsConnectees.add(destination); 
+    public void connecter (SondeAnalogique sondeAnalogique) {
+	destinationsConnectees.add(sondeAnalogique); 
     }
    
     /**
