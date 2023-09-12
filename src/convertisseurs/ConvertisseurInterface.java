@@ -8,19 +8,21 @@ import destinations.DestinationInterface;
  * d'informations dont les éléments sont de type T
  * @author prou
  */
-public interface convertisseurInterface <T>  {
+public interface ConvertisseurInterface <R,E>  {
    
     /**
      * pour obtenir la dernière information émise par une convertisseur.
      * @return une information   
      */
-    public Information <T>  getInformationEmise();
+    public Information <E>  getInformationEmise();
+
+    public Information <R>  getInformationRecue();
    
     /**
      * pour connecter une destination à la convertisseur
      * @param destination  la destination à connecter
      */
-    public void connecter (DestinationInterface <T> destination);
+    public void connecter (DestinationInterface <E> destination);
    
     /**
      * pour émettre l'information contenue dans une convertisseur

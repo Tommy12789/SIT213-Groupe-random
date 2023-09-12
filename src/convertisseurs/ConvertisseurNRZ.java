@@ -1,5 +1,6 @@
 package convertisseurs;
 
+import destinations.DestinationInterface;
 import information.Information;
 import information.InformationNonConformeException;
 
