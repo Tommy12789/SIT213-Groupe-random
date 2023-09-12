@@ -8,7 +8,6 @@ import information.InformationNonConformeException;
 import sources.Source;
 import sources.SourceAleatoire;
 import sources.SourceFixe;
-import transmetteurs.FLoat;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurParfait;
 import transmetteurs.TransmetteurParfaitAnalogique;
@@ -75,7 +74,7 @@ public class Simulateur {
     	analyseArguments(args);
       
         source=new SourceAleatoire();
-        convertisseur = new ConvertisseurNRZ(0.0f, 1.0f, 0.1f, 0.01f);
+        convertisseur = new ConvertisseurNRZ(-1f, 1.0f, 0.01f, 0.001f);
         destination = new DestinationFinaleAnalogique();
         
         transmetteurLogique = new TransmetteurParfaitAnalogique();
@@ -86,7 +85,7 @@ public class Simulateur {
         transmetteurLogique.connecter(destination);
 
         
-        source.connecter(new SondeAnalogique("Source" ));
+        source.connecter(new SondeLogique("Source",100 ));
         transmetteurLogique.connecter(new SondeAnalogique("Transmetteur" ));
        
       		
@@ -181,7 +180,7 @@ public class Simulateur {
     public float  calculTauxErreurBinaire() {
     	int nbErreur = 0;
     	Information <Boolean> informationEmise = source.getInformationEmise();
-    	Information <Boolean> informationRecue = destination.getInformationRecue();
+    	Information <Float> informationRecue = destination.getInformationRecue();
     	
     	//verification de la longueur des mots binaires
     	if (informationEmise.nbElements() == informationRecue.nbElements()){ 
