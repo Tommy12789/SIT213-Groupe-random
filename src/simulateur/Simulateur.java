@@ -1,5 +1,8 @@
 package simulateur;
 import convertisseurs.ConvertisseurNRZ;
+import convertisseurs.ConvertisseurInv;
+import convertisseurs.ConvertisseurNRZT;
+import convertisseurs.ConvertisseurRZ;
 import destinations.Destination;
 import destinations.DestinationFinale;
 import destinations.DestinationFinaleAnalogique;
@@ -7,9 +10,7 @@ import information.Information;
 import information.InformationNonConformeException;
 import sources.Source;
 import sources.SourceAleatoire;
-import sources.SourceFixe;
 import transmetteurs.Transmetteur;
-import transmetteurs.TransmetteurParfait;
 import transmetteurs.TransmetteurParfaitAnalogique;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
@@ -48,13 +49,16 @@ public class Simulateur {
 
 
     /** le  composant ConvertisseurNRZ de la chaine de transmission */
-    private ConvertisseurNRZ <Boolean,Double> convertisseur = null;
+    private ConvertisseurNRZT <Boolean,Double> convertisseur = null;
+
+    /** le  composant ConvertisseurNRZInv de la chaine de transmission */
+    private ConvertisseurInv <Float,Boolean> convertisseurInv = null;
     
     /** le  composant Transmetteur parfait logique de la chaine de transmission */
     private Transmetteur<Float, Float>  transmetteurLogique = null;
     
     /** le  composant Destination de la chaine de transmission */
-    private Destination<Float>  destination = null;
+    private Destination<Boolean>  destination = null;
    	
    
     /** Le constructeur de Simulateur construit une chaîne de
@@ -74,19 +78,24 @@ public class Simulateur {
     	analyseArguments(args);
       
         source=new SourceAleatoire();
-        convertisseur = new ConvertisseurNRZ(-1f, 1.0f, 0.01f, 0.001f);
-        destination = new DestinationFinaleAnalogique();
+        convertisseur = new ConvertisseurNRZT(-1f, 1.0f,100);
+        convertisseurInv = new ConvertisseurInv(-1f, 1.0f,100);
+
+        destination = new DestinationFinale();
         
         transmetteurLogique = new TransmetteurParfaitAnalogique();
         
         source.connecter(convertisseur);
         convertisseur.connecter(transmetteurLogique);
 
-        transmetteurLogique.connecter(destination);
+        transmetteurLogique.connecter(convertisseurInv);
+        convertisseurInv.connecter(destination);
 
         
         source.connecter(new SondeLogique("Source",100 ));
         transmetteurLogique.connecter(new SondeAnalogique("Transmetteur" ));
+        //convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
+
        
       		
     }
@@ -180,7 +189,7 @@ public class Simulateur {
     public float  calculTauxErreurBinaire() {
     	int nbErreur = 0;
     	Information <Boolean> informationEmise = source.getInformationEmise();
-    	Information <Float> informationRecue = destination.getInformationRecue();
+    	Information <Boolean> informationRecue = destination.getInformationRecue();
     	
     	//verification de la longueur des mots binaires
     	if (informationEmise.nbElements() == informationRecue.nbElements()){ 

@@ -3,7 +3,7 @@ package convertisseurs;
 import information.Information;
 import information.InformationNonConformeException;
 
-public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
+public class ConvertisseurNRZT <R,E> extends Convertisseur<Boolean,Float>{
 
     private float vMin;
     private float vMax;
@@ -13,14 +13,14 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
     /**
      * Une convertisseur qui envoie toujours le même message
      */
-    public ConvertisseurNRZ (float vMin, float vMax) {
+    public ConvertisseurNRZT (float vMin, float vMax) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
         this.nbEchantillons = 30;
     }
 
-        public ConvertisseurNRZ (float vMin, float vMax, int nbEchantillons) {
+        public ConvertisseurNRZT (float vMin, float vMax, int nbEchantillons) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
@@ -42,6 +42,7 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
                 }
             }
         }
+         
         this.emettre();
     }
 
@@ -54,6 +55,5 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
     public Information<Float> getInformationEmise() {
         return this.informationEmise;
     }
-
 
 }

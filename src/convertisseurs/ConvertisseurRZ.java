@@ -3,7 +3,7 @@ package convertisseurs;
 import information.Information;
 import information.InformationNonConformeException;
 
-public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
+public class ConvertisseurRZ <R,E> extends Convertisseur<Boolean,Float>{
 
     private float vMin;
     private float vMax;
@@ -13,14 +13,14 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
     /**
      * Une convertisseur qui envoie toujours le même message
      */
-    public ConvertisseurNRZ (float vMin, float vMax) {
+    public ConvertisseurRZ (float vMin, float vMax) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
         this.nbEchantillons = 30;
     }
 
-        public ConvertisseurNRZ (float vMin, float vMax, int nbEchantillons) {
+        public ConvertisseurRZ (float vMin, float vMax, int nbEchantillons) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
@@ -34,11 +34,27 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
         for (int i = 0; i < information.nbElements(); i++) {
             if (information.iemeElement(i)) {
                 for (int j = 0; j < nbEchantillons; j++) {
-                    informationEmise.add(vMax);
+                    if(j<nbEchantillons/3){
+                        informationEmise.add(0f);
+                    }
+                    else if(j>nbEchantillons/3 && j<2*nbEchantillons/3){
+                        informationEmise.add(vMax);
+                    }
+                    else{
+                        informationEmise.add(0f);
+                    }
                 }
             } else {
                 for (int j = 0; j < nbEchantillons; j++) {
-                    informationEmise.add(vMin);
+                    if(j<nbEchantillons/3){
+                        informationEmise.add(0f);
+                    }
+                    else if(j>nbEchantillons/3 && j<2*nbEchantillons/3){
+                        informationEmise.add(vMin);
+                    }
+                    else{
+                        informationEmise.add(0f);
+                    }
                 }
             }
         }
@@ -54,6 +70,5 @@ public class ConvertisseurNRZ <R,E> extends Convertisseur<Boolean,Float>{
     public Information<Float> getInformationEmise() {
         return this.informationEmise;
     }
-
 
 }
