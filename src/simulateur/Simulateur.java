@@ -1,5 +1,6 @@
 package simulateur;
 import convertisseurs.ConvertisseurNRZ;
+import convertisseurs.Convertisseur;
 import convertisseurs.ConvertisseurInv;
 import convertisseurs.ConvertisseurNRZT;
 import convertisseurs.ConvertisseurRZ;
@@ -11,6 +12,7 @@ import information.InformationNonConformeException;
 import sources.Source;
 import sources.SourceAleatoire;
 import transmetteurs.Transmetteur;
+import transmetteurs.TransmetteurBruiteAnalogique;
 import transmetteurs.TransmetteurParfaitAnalogique;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
@@ -49,7 +51,7 @@ public class Simulateur {
 
 
     /** le  composant ConvertisseurNRZ de la chaine de transmission */
-    private ConvertisseurNRZT <Boolean,Double> convertisseur = null;
+    private ConvertisseurNRZ <Boolean,Double> convertisseur = null;
 
     /** le  composant ConvertisseurNRZInv de la chaine de transmission */
     private ConvertisseurInv <Float,Boolean> convertisseurInv = null;
@@ -59,6 +61,9 @@ public class Simulateur {
     
     /** le  composant Destination de la chaine de transmission */
     private Destination<Boolean>  destination = null;
+
+    /** SNRB par défaut : 0 */
+    private float SNRPB = 100;
    	
    
     /** Le constructeur de Simulateur construit une chaîne de
@@ -68,7 +73,7 @@ public class Simulateur {
      * chaîne de transmission (Source, Transmetteur(s), Destination,
      * Sonde(s) de visualisation) sont créés et connectés.
      * @param args le tableau des différents arguments.
-     *
+     *² 
      * @throws ArgumentsException si un des arguments est incorrect
      * @throws InformationNonConformeException si l'infomration n'est pas conforme
      *
@@ -78,12 +83,12 @@ public class Simulateur {
     	analyseArguments(args);
       
         source=new SourceAleatoire();
-        convertisseur = new ConvertisseurNRZT(-1f, 1.0f,100);
+        convertisseur = new ConvertisseurNRZ(-1f, 1.0f,100);
         convertisseurInv = new ConvertisseurInv(-1f, 1.0f,100);
 
         destination = new DestinationFinale();
         
-        transmetteurLogique = new TransmetteurParfaitAnalogique();
+        transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,100);
         
         source.connecter(convertisseur);
         convertisseur.connecter(transmetteurLogique);
@@ -92,9 +97,12 @@ public class Simulateur {
         convertisseurInv.connecter(destination);
 
         
-        source.connecter(new SondeLogique("Source",100 ));
-        transmetteurLogique.connecter(new SondeAnalogique("Transmetteur" ));
-        //convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
+        if (affichage){
+            source.connecter(new SondeLogique("Source",100 ));
+            convertisseur.connecter(new SondeAnalogique("Convertisseur"));
+            transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
+            convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
+        }
 
        
       		

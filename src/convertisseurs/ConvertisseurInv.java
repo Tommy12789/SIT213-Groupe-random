@@ -34,7 +34,6 @@ public class ConvertisseurInv <R,E> extends Convertisseur<Float,Boolean>{
         this.informationEmise = new Information<Boolean>();
 
         for (int i = 0; i < informationRecue.nbElements(); i=i+nbEchantillons) {
-            System.out.println(i);
             moyenne = 0;
             for (int j = 0; j < nbEchantillons ; j++) {
                 moyenne = moyenne + informationRecue.iemeElement(j+i);
