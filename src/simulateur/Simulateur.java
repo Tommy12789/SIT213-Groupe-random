@@ -45,13 +45,11 @@ public class Simulateur {
     /** la chaîne de caractères correspondant à m dans l'argument -mess m */
     private String messageString = "100";
    
-   	
     /** le  composant Source de la chaine de transmission */
     private Source <Boolean>  source = null;
 
-
-    /** le  composant ConvertisseurNRZ de la chaine de transmission */
-    private ConvertisseurNRZ <Boolean,Double> convertisseur = null;
+    /**le composant convertisseur de la chaine de transmission */
+    private Convertisseur <Boolean,Float> convertisseur = null;
 
     /** le  composant ConvertisseurNRZInv de la chaine de transmission */
     private ConvertisseurInv <Float,Boolean> convertisseurInv = null;
@@ -83,7 +81,6 @@ public class Simulateur {
     	analyseArguments(args);
       
         source=new SourceAleatoire();
-        convertisseur = new ConvertisseurNRZ(-1f, 1.0f,100);
         convertisseurInv = new ConvertisseurInv(-1f, 1.0f,100);
 
         destination = new DestinationFinale();
@@ -92,7 +89,6 @@ public class Simulateur {
         
         source.connecter(convertisseur);
         convertisseur.connecter(transmetteurLogique);
-
         transmetteurLogique.connecter(convertisseurInv);
         convertisseurInv.connecter(destination);
 
@@ -104,8 +100,6 @@ public class Simulateur {
             convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
         }
 
-       
-      		
     }
    
    
@@ -165,8 +159,32 @@ public class Simulateur {
     			else 
     				throw new ArgumentsException("Valeur du parametre -mess invalide : " + args[i]);
     		}
-    		
-    		//TODO : ajouter ci-après le traitement des nouvelles options
+    	
+            else if (args[i].matches("-snrpb")){
+                i++;
+                try {
+                    SNRPB = Float.valueOf(args[i]);
+                }
+                catch (Exception e) {
+                    throw new ArgumentsException("Valeur du parametre -snrpb invalide :" + args[i]);
+                }
+            }
+
+            //ajout du paramentre NRZ,RZ ou RNZT
+            else if (args[i].matches("-form")){
+                i++;
+                if (args[i].matches("NRZ")){
+                    convertisseur = new ConvertisseurNRZ(-1f, 1.0f,100);
+                }
+                else if (args[i].matches("RZ")){
+                    convertisseur = new ConvertisseurRZ(-1f, 1.0f,100);
+                }
+                else if (args[i].matches("NRZT")){
+                    convertisseur = new ConvertisseurNRZT(-1f, 1.0f,100);
+                }
+                else throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
+            }
+
 
     		else throw new ArgumentsException("Option invalide :"+ args[i]);
     	}
