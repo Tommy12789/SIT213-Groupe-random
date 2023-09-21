@@ -16,6 +16,7 @@ import transmetteurs.TransmetteurBruiteAnalogique;
 import transmetteurs.TransmetteurParfaitAnalogique;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
+import simulateur.Simulateur;
 
 
 /** La classe Simulateur permet de construire et simuler une chaîne de
