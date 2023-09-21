@@ -21,7 +21,7 @@ public class ConvertisseurInv <R,E> extends Convertisseur<Float,Boolean>{
         this.nbEchantillons = 30;
     }
 
-        public ConvertisseurInv (float vMin, float vMax, int nbEchantillons) {
+    public ConvertisseurInv (float vMin, float vMax, int nbEchantillons) {
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
@@ -33,12 +33,12 @@ public class ConvertisseurInv <R,E> extends Convertisseur<Float,Boolean>{
         this.informationRecue = information;
         this.informationEmise = new Information<Boolean>();
 
-        for (int i = 0; i < informationRecue.nbElements(); i=i+nbEchantillons) {
+        for (int i = 0; i < informationRecue.nbElements() - (nbEchantillons/3); i=i+nbEchantillons) {
             moyenne = 0;
-            for (int j = 0; j < nbEchantillons ; j++) {
-                moyenne = moyenne + informationRecue.iemeElement(j+i);
+            for (int j = (int) (nbEchantillons/3) + i ; j <= (int) (2*(nbEchantillons/3)) + i ; j++) {
+                moyenne = moyenne + informationRecue.iemeElement(j);
             }
-            moyenne = moyenne/nbEchantillons;
+            moyenne = moyenne/(nbEchantillons/3);
 
             if (moyenne > (vMax+vMin)/2) {
                 informationEmise.add(true);
@@ -46,6 +46,8 @@ public class ConvertisseurInv <R,E> extends Convertisseur<Float,Boolean>{
                 informationEmise.add(false);
             }
         }
+
+
         this.emettre();
     }
 

@@ -11,6 +11,8 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 	private double a1 = 0;
 	private double a2 = 0;
 	private double bruit = 0;
+	private Information<String> listeCSV = new Information <String>();
+
 
 	/**
 	 * Transmetteur parfait : il transmet exactement ce qu'il recoit
@@ -23,15 +25,14 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 
 	}
 
-		public TransmetteurBruiteAnalogique(float SNRPB, int nbEchantillons) {
+	public TransmetteurBruiteAnalogique(float SNRPB, int nbEchantillons) {
 		super();
 		informationEmise = new Information <Float>();
 		informationRecue = new Information <Float>();
-		this.SNRPB= (float) Math.pow(SNRPB/10,10);
+		this.SNRPB= (float) Math.pow(10,SNRPB/10);
 		this.nbEchantillons=nbEchantillons;
 
 	}
-
 
 
 	@Override
@@ -46,32 +47,30 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 
 		System.out.println("Puissance du signal : "+puissance_signal);
 
-		//generation du bruit gaussien avec une valeur de EB/N0 de SNRP
+		//calcul de la puissance du bruit
 		float puissance_bruit = puissance_signal/SNRPB;
 		
-		//affichage du EB/N0 en dB
-		System.out.println("EB/N0 : "+10*Math.log10(SNRPB)+" dB");
+		//affichage du rapport signal sur bruit
+		System.out.println("Rapport signal sur bruit : "+10*Math.log10(puissance_signal/puissance_bruit)+" dB");
 
 		//ajout du bruit au signal
-		double sigma = (float) (Math.sqrt((nbEchantillons*puissance_signal)/(2*SNRPB)));
+		double variance = (float) (Math.sqrt((nbEchantillons*puissance_signal)/(2*SNRPB)));
 	
+
+
 		for (int i = 0 ; information.nbElements() > i ; i++ ) {
 			//calcul du bruit
 			a1 = Math.random();
 			a2 = Math.random();
-			bruit = sigma * Math.sqrt(-2*Math.log(1-a1))*Math.cos(2*Math.PI*a2);
+			bruit = variance * Math.sqrt(-2*Math.log(1-a1))*Math.cos(2*Math.PI*a2);
 
 			//ajout du bruit au signal
 			informationRecue.add(information.iemeElement(i));
 			informationEmise.add(information.iemeElement(i)+ (float)bruit);
+
+			//ajout du bruit dans une liste
+			listeCSV.add(String.valueOf((float) Math.round(bruit * 10) / 10));
 		}
-
-
-
-
-
-
-
 
 		emettre();
 	}
@@ -82,5 +81,6 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 	        destinationConnectees.recevoir(informationEmise);
 		}
 	}
+
 
 }

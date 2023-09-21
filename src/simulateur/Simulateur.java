@@ -62,6 +62,17 @@ public class Simulateur {
 
     /** SNRB par défaut : 0 */
     private float SNRPB = 100;
+
+    /** Nombre d'échantillons par défaut : 30 */
+    private int nbEchantillons = 30;
+
+    /** Vmin et vmax */
+    private float vMin = 0f;
+    private float vMax = 1.0f;
+
+    /** Forme du signal */
+    private String form = "NRZ";
+
    	
    
     /** Le constructeur de Simulateur construit une chaîne de
@@ -80,12 +91,28 @@ public class Simulateur {
     	// analyser et récupérer les arguments   	
     	analyseArguments(args);
       
-        source=new SourceAleatoire();
-        convertisseurInv = new ConvertisseurInv(-1f, 1.0f,100);
+        if(seed!=null){
+            source=new SourceAleatoire(nbBitsMess, seed);
+        }
+        else{
+            source=new SourceAleatoire(nbBitsMess);
+        }
 
+        convertisseurInv = new ConvertisseurInv(vMin, vMax,nbEchantillons);
         destination = new DestinationFinale();
-        
-        transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,100);
+        transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
+
+
+        if (form.matches("NRZ")){
+            convertisseur = new ConvertisseurNRZ(vMin, vMax,nbEchantillons);
+        }
+        else if (form.matches("RZ")){
+            convertisseur = new ConvertisseurRZ(vMin, vMax,nbEchantillons);
+        }
+        else if (form.matches("NRZT")){
+            convertisseur = new ConvertisseurNRZT(vMin, vMax,nbEchantillons);
+        }
+
         
         source.connecter(convertisseur);
         convertisseur.connecter(transmetteurLogique);
@@ -99,6 +126,7 @@ public class Simulateur {
             transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
             convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
         }
+
 
     }
    
@@ -170,20 +198,43 @@ public class Simulateur {
                 }
             }
 
-            //ajout du paramentre NRZ,RZ ou RNZT
+            //ajout de l'option nbEchantillons
+            else if (args[i].matches("-nbEch")){
+                i++;
+                try {
+                    nbEchantillons = Integer.valueOf(args[i]);
+                }
+                catch (Exception e) {
+                    throw new ArgumentsException("Valeur du parametre -nbEch invalide :" + args[i]);
+                }
+            }
+
+            //ajout de  l'option -ampl min max
+            else if (args[i].matches("-ampl")){
+                i++;
+                try {
+                    vMin = Float.valueOf(args[i]);
+                    i++;
+                    vMax = Float.valueOf(args[i]);
+                }
+                catch (Exception e) {
+                    throw new ArgumentsException("Valeur du parametre -ampl invalide :" + args[i]);
+                }
+            }
+
+
+            //ajout du paramentre NRZ,RZ ou RNZT dans form
             else if (args[i].matches("-form")){
                 i++;
-                if (args[i].matches("NRZ")){
-                    convertisseur = new ConvertisseurNRZ(-1f, 1.0f,100);
+                try {
+                    form = args[i];
                 }
-                else if (args[i].matches("RZ")){
-                    convertisseur = new ConvertisseurRZ(-1f, 1.0f,100);
+                catch (Exception e) {
+                    throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
                 }
-                else if (args[i].matches("NRZT")){
-                    convertisseur = new ConvertisseurNRZT(-1f, 1.0f,100);
-                }
-                else throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
             }
+            
+
 
 
     		else throw new ArgumentsException("Option invalide :"+ args[i]);
