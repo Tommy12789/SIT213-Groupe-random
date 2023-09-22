@@ -106,7 +106,7 @@ public class Simulateur {
         destination = new DestinationFinale();
 
         if (trajetsMultiples.nbElements() != 0){
-            transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons);
+            transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons,trajetsMultiples);
         }
         else{
             transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
@@ -265,17 +265,19 @@ public class Simulateur {
                     if (trajetsMultiples.nbElements() == 0 || trajetsMultiples.nbElements()%2 != 0){
                         throw new ArgumentsException("Valeur du parametre -ti invalide : nombre de parametres invalide");
                     }
+
+                    //pour toutes les valeurs de la liste on vérifie qu'elles sont positives
+                    for (int j = 0; j < trajetsMultiples.nbElements(); j++) {
+                        if (trajetsMultiples.iemeElement(j) < 0){
+                            throw new ArgumentsException("Valeur du parametre -ti invalide : valeur negative");
+                        }
+                    }
                     
                 }
                 catch (Exception e) {
-                    throw new ArgumentsException("Valeur du parametre -ti invalide : ");
+                    throw new ArgumentsException(e.getMessage());
                 }
             }
-            
-            
-
-            
-
 
 
     		else throw new ArgumentsException("Option invalide :"+ args[i]);
