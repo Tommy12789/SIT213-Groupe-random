@@ -13,6 +13,7 @@ import sources.Source;
 import sources.SourceAleatoire;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurBruiteAnalogique;
+import transmetteurs.TransmetteurBruiteAnalogiqueTrajetsMultiples;
 import transmetteurs.TransmetteurParfaitAnalogique;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
@@ -74,8 +75,10 @@ public class Simulateur {
     /** Forme du signal */
     private String form = "NRZ";
 
-   	
-   
+
+    /** liste des retards */
+    private Information<Float> trajetsMultiples = new Information <Float>();
+
     /** Le constructeur de Simulateur construit une chaîne de
      * transmission composée d'une Source Boolean, d'une Destination
      * Boolean et de Transmetteur(s) [voir la méthode
@@ -101,7 +104,13 @@ public class Simulateur {
 
         convertisseurInv = new ConvertisseurInv(vMin, vMax,nbEchantillons);
         destination = new DestinationFinale();
-        transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
+
+        if (trajetsMultiples.nbElements() != 0){
+            transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons);
+        }
+        else{
+            transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
+        }
 
 
         if (form.matches("NRZ")){
@@ -234,6 +243,37 @@ public class Simulateur {
                     throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
                 }
             }
+
+
+            //ajout de la commande -ti
+            else if (args[i].matches("-ti")){
+                try {
+                    for (int j = i+1; j < i+10; j++) {
+                        //si l'argument est un nombre
+                        if (args[j].matches("[-+]?\\d*\\.?\\d+")){
+                            i++;
+                            float nb = Float.valueOf(args[j]);
+                            trajetsMultiples.add(nb);
+
+                        }
+                        else {
+                            break;
+                        }
+
+                    }
+                    //si la liste est vide ou impairement remplie
+                    if (trajetsMultiples.nbElements() == 0 || trajetsMultiples.nbElements()%2 != 0){
+                        throw new ArgumentsException("Valeur du parametre -ti invalide : nombre de parametres invalide");
+                    }
+                    
+                }
+                catch (Exception e) {
+                    throw new ArgumentsException("Valeur du parametre -ti invalide : ");
+                }
+            }
+            
+            
+
             
 
 
