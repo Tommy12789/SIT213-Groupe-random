@@ -65,6 +65,30 @@ public class TransmetteurBruiteAnalogiqueTrajetsMultiples extends Transmetteur <
 			}
 		}
 
+		//calcul de la puissance du signal
+		float puissance_signal = 0;
+		for (int i = 0 ; informationEmise.nbElements() > i ; i++ ) {
+			puissance_signal=puissance_signal+informationEmise.iemeElement(i)*informationEmise.iemeElement(i);
+		}
+		puissance_signal=puissance_signal/information.nbElements();
+		
+		//calcul de la puissance du bruit
+		float puissance_bruit = puissance_signal/SNRPB;
+
+		//ajout du bruit au signal
+		double variance = (float) (Math.sqrt((nbEchantillons*puissance_signal)/(2*SNRPB)));
+	
+
+
+		for (int i = 0 ; informationEmise.nbElements() > i ; i++ ) {
+			//calcul du bruit
+			a1 = Math.random();
+			a2 = Math.random();
+			bruit = variance * Math.sqrt(-2*Math.log(1-a1))*Math.cos(2*Math.PI*a2);
+
+			//ajout du bruit au signal
+			informationEmise.setIemeElement(i,informationEmise.iemeElement(i)+ (float)bruit);
+		}
 
 		emettre();
 	}
