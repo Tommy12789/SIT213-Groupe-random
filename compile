@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "Compiling...."
+
+#javac -d bin \
+#    src/simulateur/*.java \
+#    src/destinations/*.java \
+#    src/information/*.java \
+#    src/sources/*.java \
+#    src/transmetteurs/*.java \
+#    src/visualisations/*.java
+
+javac -d bin \
+	    -cp ".:lib/apiguardian-api-1.1.2.jar:lib/junit-jupiter-5.9.2.jar:lib/junit-jupiter-api-5.9.2.jar:lib/junit-jupiter-engine-5.9.2.jar:lib/junit-jupiter-params-5.9.2.jar:lib/junit-platform-commons-1.9.2.jar:lib/junit-platform-engine-1.9.2.jar:lib/opentest4j-1.2.0.jar" \
+	    src/*/*.java
+
+echo "Done !"
+

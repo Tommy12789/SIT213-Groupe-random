@@ -11,6 +11,7 @@ import information.Information;
 import information.InformationNonConformeException;
 import sources.Source;
 import sources.SourceAleatoire;
+import sources.SourceFixe;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurBruiteAnalogique;
 import transmetteurs.TransmetteurBruiteAnalogiqueTrajetsMultiples;
@@ -73,7 +74,7 @@ public class Simulateur {
     private float vMax = 1.0f;
 
     /** Forme du signal */
-    private String form = "NRZ";
+    private String form = "RZ";
 
 
     /** liste des retards */
@@ -98,9 +99,22 @@ public class Simulateur {
         if(seed!=null){
             source=new SourceAleatoire(nbBitsMess, seed);
         }
-        else{
-            source=new SourceAleatoire(nbBitsMess);
+        if(messageAleatoire){
+            source = new SourceAleatoire(nbBitsMess);
         }
+        else{
+            //convertir la chaîne de caractères en un tableau de booléens
+            Boolean[] message = new Boolean[messageString.length()];
+            for (int i = 0; i < messageString.length(); i++) {
+                if (messageString.charAt(i) == '0') {
+                    message[i] = false;
+                } else {
+                    message[i] = true;
+                }
+            }
+            source = new SourceFixe(message);
+        }
+
 
         convertisseurInv = new ConvertisseurInv(vMin, vMax,nbEchantillons);
         destination = new DestinationFinale();
@@ -213,9 +227,13 @@ public class Simulateur {
                 i++;
                 try {
                     nbEchantillons = Integer.valueOf(args[i]);
+                    //si nbEch < 10 on leve une erreur
+                    if (nbEchantillons < 10){
+                        throw new ArgumentsException("Valeur du parametre -nbEch invalide : nombre d'échantillons trop faible");
+                    }
                 }
                 catch (Exception e) {
-                    throw new ArgumentsException("Valeur du parametre -nbEch invalide :" + args[i]);
+                    throw new ArgumentsException(e.getMessage());
                 }
             }
 
@@ -226,9 +244,14 @@ public class Simulateur {
                     vMin = Float.valueOf(args[i]);
                     i++;
                     vMax = Float.valueOf(args[i]);
+
+                    //leve une erreur si min>max
+                    if (vMin > vMax){
+                        throw new ArgumentsException("Valeur du parametre -ampl invalide : min > max");
+                    }
                 }
                 catch (Exception e) {
-                    throw new ArgumentsException("Valeur du parametre -ampl invalide :" + args[i]);
+                    throw new ArgumentsException(e.getMessage());
                 }
             }
 
@@ -238,6 +261,9 @@ public class Simulateur {
                 i++;
                 try {
                     form = args[i];
+                    if (!form.matches("RZ|NRZ|NRZT")){
+                        throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
+                    }
                 }
                 catch (Exception e) {
                     throw new ArgumentsException("Valeur du parametre -form invalide :" + args[i]);
@@ -248,10 +274,11 @@ public class Simulateur {
             //ajout de la commande -ti
             else if (args[i].matches("-ti")){
                 try {
-                    for (int j = i+1; j < i+10; j++) {
+                    for (int j = i+1; j < args.length; j++) {
                         //si l'argument est un nombre
                         if (args[j].matches("[-+]?\\d*\\.?\\d+")){
                             i++;
+                            System.out.println(args[j]);
                             float nb = Float.valueOf(args[j]);
                             trajetsMultiples.add(nb);
 
@@ -272,6 +299,21 @@ public class Simulateur {
                             throw new ArgumentsException("Valeur du parametre -ti invalide : valeur negative");
                         }
                     }
+
+                    //on vérifie que les amplitudes sont inferieures à 1
+                    for (int j = 1; j < trajetsMultiples.nbElements(); j=j+2) {
+                        if (trajetsMultiples.iemeElement(j) > 1){
+                            throw new ArgumentsException("Valeur du parametre -ti invalide : amplitude superieure à 1");
+                        }
+                    }
+
+                    //on vérifie que les valeurs sont des entiers
+                    for (int j = 0; j < trajetsMultiples.nbElements(); j=j+2) {
+                        if (trajetsMultiples.iemeElement(j) != Math.round(trajetsMultiples.iemeElement(j))){
+                            throw new ArgumentsException("Valeur du parametre -ti invalide : décalage non entier");
+                        }
+                    }
+
                     
                 }
                 catch (Exception e) {
@@ -310,22 +352,16 @@ public class Simulateur {
     	int nbErreur = 0;
     	Information <Boolean> informationEmise = source.getInformationEmise();
     	Information <Boolean> informationRecue = destination.getInformationRecue();
-    	
+
+
+
     	//verification de la longueur des mots binaires
-    	if (informationEmise.nbElements() == informationRecue.nbElements()){ 
-    		for( int i = 0 ; i < informationEmise.nbElements() ; i++) {
-    			if (!informationEmise.iemeElement(i).equals(informationRecue.iemeElement(i))){
-    				nbErreur ++;
-    			}
+   		for( int i = 0 ; i < informationEmise.nbElements() ; i++) {
+    		if (!informationEmise.iemeElement(i).equals(informationRecue.iemeElement(i))){
+    			nbErreur ++;
     		}
-    		return (float) nbErreur / (float) informationRecue.nbElements(); //calcul du TEB
-    	}
-    	else{ // si les mots binaires ne sont pas de la même longeur, le message est corrompu !
-    		System.out.println("Les mots binaires ne sont pas de la même longeur !");
-    		return  1.0f;
-    	}
- 
-    	
+		}    		
+        return (float) nbErreur / (float) informationRecue.nbElements(); //calcul du TEB
     }
    
    

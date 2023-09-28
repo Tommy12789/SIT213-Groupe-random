@@ -17,7 +17,7 @@ public class ConvertisseurNRZT <R,E> extends Convertisseur<Boolean,Float>{
         super();        
         this.vMin = vMin;
         this.vMax = vMax;
-        this.nbEchantillons = 30;
+        this.nbEchantillons = 0;
     }
 
         public ConvertisseurNRZT (float vMin, float vMax, int nbEchantillons) {

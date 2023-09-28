@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Cleaning working directory...."
+rm -rf bin/*
+rm -rf docs/*
+echo "Working directory cleaned"
