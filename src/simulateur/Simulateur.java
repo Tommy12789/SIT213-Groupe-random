@@ -1,5 +1,8 @@
 package simulateur;
 import convertisseurs.ConvertisseurNRZ;
+import codeurs.Codeur;
+import codeurs.CodeurCanal;
+import codeurs.CodeurCanalInv;
 import convertisseurs.Convertisseur;
 import convertisseurs.ConvertisseurInv;
 import convertisseurs.ConvertisseurNRZT;
@@ -38,6 +41,9 @@ public class Simulateur {
     
     /** indique si le Simulateur utilise un germe pour initialiser les générateurs aléatoires */
     private boolean aleatoireAvecGerme = false;
+
+    /** indique si un codage de canal est utilisé */
+    private boolean codeurCanal = false;
     
     /** la valeur de la semence utilisée pour les générateurs aléatoires */
     private Integer seed = null; // pas de semence par défaut
@@ -53,6 +59,12 @@ public class Simulateur {
 
     /**le composant convertisseur de la chaine de transmission */
     private Convertisseur <Boolean,Float> convertisseur = null;
+
+    /** le composant codeur de la chaine pour le codage canal*/
+    private Codeur <Boolean,Boolean> codeur = null;
+
+    /** le composant codeur de la chaine pour le codage canal*/
+    private Codeur <Boolean,Boolean> codeurInv = null;
 
     /** le  composant ConvertisseurNRZInv de la chaine de transmission */
     private ConvertisseurInv <Float,Boolean> convertisseurInv = null;
@@ -138,18 +150,40 @@ public class Simulateur {
         }
 
         
-        source.connecter(convertisseur);
-        convertisseur.connecter(transmetteurLogique);
-        transmetteurLogique.connecter(convertisseurInv);
-        convertisseurInv.connecter(destination);
+        if (codeurCanal){
+            codeur = new CodeurCanal();
+            codeurInv = new CodeurCanalInv();
+
+            source.connecter(codeur);
+            codeur.connecter(convertisseur);
+            convertisseur.connecter(transmetteurLogique);
+            transmetteurLogique.connecter(convertisseurInv);
+            convertisseurInv.connecter(codeurInv);
+            codeurInv.connecter(destination);
+        }else{
+            source.connecter(convertisseur);
+            convertisseur.connecter(transmetteurLogique);
+            transmetteurLogique.connecter(convertisseurInv);
+            convertisseurInv.connecter(destination);
+        }
+        
+
 
         
-        if (affichage){
+        if (affichage && !codeurCanal){
             source.connecter(new SondeLogique("Source",100 ));
             convertisseur.connecter(new SondeAnalogique("Convertisseur"));
             transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
             convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
         }
+
+        if (affichage && codeurCanal){
+            source.connecter(new SondeLogique("Source",100 ));
+            convertisseur.connecter(new SondeAnalogique("Convertisseur"));
+            transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
+            codeurInv.connecter(new SondeLogique("Destination ",100 ));  
+        }
+    
 
 
     }
@@ -180,6 +214,13 @@ public class Simulateur {
 
     		if (args[i].matches("-s")){
     			affichage = true;
+                i++;
+
+    		}
+
+            //ajout de la commande -codeur 
+            if (args[i].matches("-codeur")){
+    			codeurCanal = true;
     		}
     		
     		else if (args[i].matches("-seed")) {
@@ -321,6 +362,8 @@ public class Simulateur {
                 }
             }
 
+
+            
 
     		else throw new ArgumentsException("Option invalide :"+ args[i]);
     	}
