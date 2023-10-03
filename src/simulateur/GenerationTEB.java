@@ -19,14 +19,15 @@ public class GenerationTEB {
     	try {
             //pour nbRealisation, creer un simulateur et calculer le TEB
             for (int i = -9; i < 19 ; i++) {
-                simulateur = new Simulateur(new String[]{"-form", "NRZ","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000", "-ti","50","0.3","60","0.3","80","0.2","100","0.15","130","0.1"});
+                simulateur = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
                 simulateur.execute();
-                simulateur1 = new Simulateur(new String[]{"-form", "RZ","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000", "-ti","50","0.3","60","0.3","80","0.2","100","0.15","130","0.1" });
-                simulateur1.execute();
-                simulateur2 = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000", "-ti","50","0.3","60","0.3","80","0.2","100","0.15","130","0.1" });
-                simulateur2.execute();
-                System.out.println("\r "+i+Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur1.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur2.calculTauxErreurBinaire()));
-                listeCSV.add(Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur1.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur2.calculTauxErreurBinaire()));
+                //simulateur1 = new Simulateur(new String[]{"-form", "RZ","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
+                //simulateur1.execute();
+                //simulateur2 = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
+                //simulateur2.execute();
+                //System.out.println("\r "+i+Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur1.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur2.calculTauxErreurBinaire()));
+                System.out.println(i);
+                listeCSV.add(Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire()));
                 
             }
     	}
