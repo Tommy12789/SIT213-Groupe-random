@@ -18,6 +18,7 @@ import sources.SourceFixe;
 import transmetteurs.Transmetteur;
 import transmetteurs.TransmetteurBruiteAnalogique;
 import transmetteurs.TransmetteurBruiteAnalogiqueTrajetsMultiples;
+import transmetteurs.TransmetteurParfait;
 import transmetteurs.TransmetteurParfaitAnalogique;
 import visualisations.SondeAnalogique;
 import visualisations.SondeLogique;
@@ -69,9 +70,12 @@ public class Simulateur {
     /** le  composant ConvertisseurNRZInv de la chaine de transmission */
     private ConvertisseurInv <Float,Boolean> convertisseurInv = null;
     
-    /** le  composant Transmetteur parfait logique de la chaine de transmission */
+    /** le  composant Transmetteur parfait anal logique de la chaine de transmission */
     private Transmetteur<Float, Float>  transmetteurLogique = null;
     
+    /** le  composant Transmetteur parfait logique de la chaine de transmission */
+    private Transmetteur<Boolean, Boolean>  transmetteurLogiqueLeVrai = null;
+
     /** le  composant Destination de la chaine de transmission */
     private Destination<Boolean>  destination = null;
 
@@ -87,6 +91,9 @@ public class Simulateur {
 
     /** Forme du signal */
     private String form = "RZ";
+
+    /** Analogique */
+    private boolean analog = false;
 
 
     /** liste des retards */
@@ -108,10 +115,10 @@ public class Simulateur {
     	// analyser et récupérer les arguments   	
     	analyseArguments(args);
       
-        if(seed!=null){
-            source=new SourceAleatoire(nbBitsMess, seed);
+        if(aleatoireAvecGerme && messageAleatoire){
+            source = new SourceAleatoire(nbBitsMess, seed);
         }
-        if(messageAleatoire){
+        else if (messageAleatoire){
             source = new SourceAleatoire(nbBitsMess);
         }
         else{
@@ -127,64 +134,98 @@ public class Simulateur {
             source = new SourceFixe(message);
         }
 
-
-        convertisseurInv = new ConvertisseurInv(vMin, vMax,nbEchantillons);
         destination = new DestinationFinale();
 
-        if (trajetsMultiples.nbElements() != 0){
-            transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons,trajetsMultiples);
+
+        if (analog){
+            convertisseurInv = new ConvertisseurInv(vMin, vMax,nbEchantillons);
+
+            if (trajetsMultiples.nbElements() != 0){
+                if(aleatoireAvecGerme){
+                    transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons,trajetsMultiples,seed);
+                }else{
+                    transmetteurLogique = new TransmetteurBruiteAnalogiqueTrajetsMultiples(SNRPB,nbEchantillons,trajetsMultiples);
+ 
+                }
+            }
+            else{
+                if(aleatoireAvecGerme){
+                    transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons,seed);
+                }else{
+                    transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
+
+                }
+            }
+
+
+            if (form.matches("NRZ")){
+                convertisseur = new ConvertisseurNRZ(vMin, vMax,nbEchantillons);
+            }
+            else if (form.matches("RZ")){
+                convertisseur = new ConvertisseurRZ(vMin, vMax,nbEchantillons);
+            }
+            else if (form.matches("NRZT")){
+                convertisseur = new ConvertisseurNRZT(vMin, vMax,nbEchantillons);
+            }
+
+        
+            if (codeurCanal){
+                codeur = new CodeurCanal();
+                codeurInv = new CodeurCanalInv();
+
+                source.connecter(codeur);
+                codeur.connecter(convertisseur);
+                convertisseur.connecter(transmetteurLogique);
+                transmetteurLogique.connecter(convertisseurInv);
+                convertisseurInv.connecter(codeurInv);
+                codeurInv.connecter(destination);
+            }else{
+                source.connecter(convertisseur);
+                convertisseur.connecter(transmetteurLogique);
+                transmetteurLogique.connecter(convertisseurInv);
+                convertisseurInv.connecter(destination);
+            }
+        
+            if (affichage && !codeurCanal){
+                source.connecter(new SondeLogique("Source",100 ));
+                convertisseur.connecter(new SondeAnalogique("Convertisseur"));
+                transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
+                convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
+            }
+
+            if (affichage && codeurCanal){
+                source.connecter(new SondeLogique("Source",100 ));
+                convertisseur.connecter(new SondeAnalogique("Convertisseur"));
+                transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
+                codeurInv.connecter(new SondeLogique("Destination ",100 ));  
+            }
         }
         else{
-            transmetteurLogique = new TransmetteurBruiteAnalogique(SNRPB,nbEchantillons);
+            transmetteurLogiqueLeVrai = new TransmetteurParfait();
+            codeur = new CodeurCanal<>();
+            codeurInv = new CodeurCanalInv<>();
+
+            if (codeurCanal){
+                source.connecter(codeur);
+                codeur.connecter(transmetteurLogiqueLeVrai);
+                transmetteurLogiqueLeVrai.connecter(codeurInv);
+                codeurInv.connecter(destination);
+            }else{
+                source.connecter(transmetteurLogiqueLeVrai);
+                transmetteurLogiqueLeVrai.connecter(destination);
+            }
+
+            if (affichage && !codeurCanal){
+                source.connecter(new SondeLogique("Source",100 ));
+                transmetteurLogiqueLeVrai.connecter(new SondeLogique("Destination",100) );
+            }
+
+            if (affichage && codeurCanal){
+                source.connecter(new SondeLogique("Source",100 ));
+                transmetteurLogiqueLeVrai.connecter(new SondeLogique("Transmetteur",100 ));
+                codeurInv.connecter(new SondeLogique("Destination",100 ));
+            }
         }
-
-
-        if (form.matches("NRZ")){
-            convertisseur = new ConvertisseurNRZ(vMin, vMax,nbEchantillons);
-        }
-        else if (form.matches("RZ")){
-            convertisseur = new ConvertisseurRZ(vMin, vMax,nbEchantillons);
-        }
-        else if (form.matches("NRZT")){
-            convertisseur = new ConvertisseurNRZT(vMin, vMax,nbEchantillons);
-        }
-
-        
-        if (codeurCanal){
-            codeur = new CodeurCanal();
-            codeurInv = new CodeurCanalInv();
-
-            source.connecter(codeur);
-            codeur.connecter(convertisseur);
-            convertisseur.connecter(transmetteurLogique);
-            transmetteurLogique.connecter(convertisseurInv);
-            convertisseurInv.connecter(codeurInv);
-            codeurInv.connecter(destination);
-        }else{
-            source.connecter(convertisseur);
-            convertisseur.connecter(transmetteurLogique);
-            transmetteurLogique.connecter(convertisseurInv);
-            convertisseurInv.connecter(destination);
-        }
-        
-
-
-        
-        if (affichage && !codeurCanal){
-            source.connecter(new SondeLogique("Source",100 ));
-            convertisseur.connecter(new SondeAnalogique("Convertisseur"));
-            transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
-            convertisseurInv.connecter(new SondeLogique("Destination ",100 ));
-        }
-
-        if (affichage && codeurCanal){
-            source.connecter(new SondeLogique("Source",100 ));
-            convertisseur.connecter(new SondeAnalogique("Convertisseur"));
-            transmetteurLogique.connecter(new SondeAnalogique("Transmetteur"));
-            codeurInv.connecter(new SondeLogique("Destination ",100 ));  
-        }
-    
-
 
     }
    
@@ -214,9 +255,7 @@ public class Simulateur {
 
     		if (args[i].matches("-s")){
     			affichage = true;
-                i++;
-
-    		}
+    		}else
 
             //ajout de la commande -codeur 
             if (args[i].matches("-codeur")){
@@ -255,6 +294,7 @@ public class Simulateur {
     	
             else if (args[i].matches("-snrpb")){
                 i++;
+                analog = true;
                 try {
                     SNRPB = Float.valueOf(args[i]);
                 }
@@ -266,6 +306,7 @@ public class Simulateur {
             //ajout de l'option nbEchantillons
             else if (args[i].matches("-nbEch")){
                 i++;
+                analog = true;
                 try {
                     nbEchantillons = Integer.valueOf(args[i]);
                     //si nbEch < 10 on leve une erreur
@@ -280,6 +321,7 @@ public class Simulateur {
 
             //ajout de  l'option -ampl min max
             else if (args[i].matches("-ampl")){
+                analog = true;
                 i++;
                 try {
                     vMin = Float.valueOf(args[i]);
@@ -299,6 +341,7 @@ public class Simulateur {
 
             //ajout du paramentre NRZ,RZ ou RNZT dans form
             else if (args[i].matches("-form")){
+                analog = true;
                 i++;
                 try {
                     form = args[i];
@@ -314,12 +357,13 @@ public class Simulateur {
 
             //ajout de la commande -ti
             else if (args[i].matches("-ti")){
+                analog = true;
                 try {
                     for (int j = i+1; j < args.length; j++) {
                         //si l'argument est un nombre
                         if (args[j].matches("[-+]?\\d*\\.?\\d+")){
                             i++;
-                            System.out.println(args[j]);
+                            //System.out.println(args[j]);
                             float nb = Float.valueOf(args[j]);
                             trajetsMultiples.add(nb);
 

@@ -1,5 +1,7 @@
 package transmetteurs;
 
+import java.util.Random;
+
 import destinations.DestinationInterface;
 import information.Information;
 import information.InformationNonConformeException;
@@ -8,9 +10,9 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 	
 	private float SNRPB = 0;
 	private int nbEchantillons = 30;
-	private double a1 = 0;
-	private double a2 = 0;
 	private double bruit = 0;
+	private int seed = 0;
+	private boolean useSeed = false;
 	private Information<String> listeCSV = new Information <String>();
 
 
@@ -34,6 +36,16 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 
 	}
 
+	public TransmetteurBruiteAnalogique(float SNRPB, int nbEchantillons, int seed) {
+		super();
+		informationEmise = new Information <Float>();
+		informationRecue = new Information <Float>();
+		this.SNRPB= (float) Math.pow(10,SNRPB/10);
+		this.nbEchantillons=nbEchantillons;
+		this.seed = seed;
+		useSeed = true;
+	}
+
 
 	@Override
 	public void recevoir(Information<Float> information) throws InformationNonConformeException {
@@ -45,7 +57,6 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 		}
 		puissance_signal=puissance_signal/information.nbElements();
 
-		//System.out.println("Puissance du signal : "+puissance_signal);
 
 		//calcul de la puissance du bruit
 		float puissance_bruit = puissance_signal/SNRPB;
@@ -56,13 +67,17 @@ public class TransmetteurBruiteAnalogique extends Transmetteur <Float,Float> {
 		//ajout du bruit au signal
 		double variance = (float) (Math.sqrt((nbEchantillons*puissance_signal)/(2*SNRPB)));
 	
-
+		//System.out.println("Puissance du signal : "+puissance_signal);
+		//affichage de pbruit
+		//System.out.println("Puissance du bruit : "+puissance_bruit);
+		//affichage de la variance
+		//System.out.println("Variance : "+variance);
+		Random a1 = useSeed ? new Random(seed) : new Random();
+		Random a2 = useSeed ? new Random(seed) : new Random();
 
 		for (int i = 0 ; information.nbElements() > i ; i++ ) {
 			//calcul du bruit
-			a1 = Math.random();
-			a2 = Math.random();
-			bruit = variance * Math.sqrt(-2*Math.log(1-a1))*Math.cos(2*Math.PI*a2);
+			bruit = variance * Math.sqrt(-2*Math.log(1-a1.nextDouble()))*Math.cos(2*Math.PI*a2.nextDouble());
 
 			//ajout du bruit au signal
 			informationRecue.add(information.iemeElement(i));

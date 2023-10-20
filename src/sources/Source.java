@@ -46,7 +46,7 @@ public  abstract class Source <T> implements  SourceInterface <T> {
    
     /**
      * connecte une destination à la source
-     * @param sondeAnalogique  la destination à connecter
+     * @param destination  la destination à connecter
      */
     public void connecter (DestinationInterface <T> destination) {
 	destinationsConnectees.add(destination); 

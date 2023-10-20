@@ -1,5 +1,7 @@
 package transmetteurs;
 
+import java.util.Random;
+
 import destinations.DestinationInterface;
 import information.Information;
 import information.InformationNonConformeException;
@@ -13,6 +15,8 @@ public class TransmetteurBruiteAnalogiqueTrajetsMultiples extends Transmetteur <
 	private double bruit = 0;
 	private Information<String> listeCSV = new Information <String>();
 	private Information<Float> trajetsMultiples = null;
+	private Boolean useSeed = false;
+	private int seed;
 
 
 	/**
@@ -27,6 +31,18 @@ public class TransmetteurBruiteAnalogiqueTrajetsMultiples extends Transmetteur <
 		this.SNRPB= (float) Math.pow(10,SNRPB/10);
 		this.nbEchantillons=nbEchantillons;
 		this.trajetsMultiples=trajetsMultiples;
+
+	}
+
+	public TransmetteurBruiteAnalogiqueTrajetsMultiples(float SNRPB, int nbEchantillons, Information<Float> trajetsMultiples, int seed) {
+		super();
+		informationEmise = new Information <Float>();
+		informationRecue = new Information <Float>();
+		this.SNRPB= (float) Math.pow(10,SNRPB/10);
+		this.nbEchantillons=nbEchantillons;
+		this.trajetsMultiples=trajetsMultiples;
+		this.seed = seed;
+		useSeed = true;
 
 	}
 
@@ -82,9 +98,9 @@ public class TransmetteurBruiteAnalogiqueTrajetsMultiples extends Transmetteur <
 
 		for (int i = 0 ; informationEmise.nbElements() > i ; i++ ) {
 			//calcul du bruit
-			a1 = Math.random();
-			a2 = Math.random();
-			bruit = variance * Math.sqrt(-2*Math.log(1-a1))*Math.cos(2*Math.PI*a2);
+			Random a1 = useSeed ? new Random(seed) : new Random();
+			Random a2 = useSeed ? new Random(seed) : new Random();
+			bruit = variance * Math.sqrt(-2*Math.log(1-a1.nextDouble()))*Math.cos(2*Math.PI*a2.nextDouble());
 
 			//ajout du bruit au signal
 			informationEmise.setIemeElement(i,informationEmise.iemeElement(i)+ (float)bruit);

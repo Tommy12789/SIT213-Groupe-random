@@ -8,28 +8,28 @@ public class GenerationTEB {
 
     public static void main(String[] args) {
     	Simulateur simulateur = null;
-        Simulateur simulateur1 = null;
-        Simulateur simulateur2 = null;
+        //Simulateur simulateur1 = null;
+        //Simulateur simulateur2 = null;
+        String ligne = null;
 
         Information<String> listeCSV = new Information <String>();
-        listeCSV.add("SNRPB;TEB_NRZ;TEB_RZ;TEB_NRZT");
+        listeCSV.add("TP_symbl;TEB_RZ");
 
 
 
     	try {
             //pour nbRealisation, creer un simulateur et calculer le TEB
-            for (int i = -9; i < 19 ; i++) {
-                simulateur = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
+            for (int i = 10 ; i < 300 ; i=i+2) {
+                simulateur = new Simulateur(new String[]{"-form", "RZ","-nbEch",Integer.toString(i),"-ampl","0f", "5f","-snrpb", "15","-mess", "200000","-ti" , "100" , "0.5"});
                 simulateur.execute();
-                //simulateur1 = new Simulateur(new String[]{"-form", "RZ","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
+                //simulateur1 = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "5f","-snrpb", "12","-mess", "200000","-ti" , Integer.toString(i) , "0.5"});
                 //simulateur1.execute();
-                //simulateur2 = new Simulateur(new String[]{"-form", "NRZT","-nbEch","100","-ampl","0f", "1f","-snrpb", Integer.toString(i),"-mess", "50000","-codeur"});
+                //simulateur2 = new Simulateur(new String[]{"-form", "NRZ","-nbEch","100","-ampl","0f", "5f","-snrpb", "12","-mess", "200000","-ti" , Integer.toString(i) , "0.5"});
                 //simulateur2.execute();
-                //System.out.println("\r "+i+Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur1.calculTauxErreurBinaire())+";"+String.format("%.6f", simulateur2.calculTauxErreurBinaire()));
-                System.out.println(i);
-                listeCSV.add(Integer.toString(i)+";"+String.format("%.6f", simulateur.calculTauxErreurBinaire()));
-                
-            }
+                ligne = Integer.toString(i)+";"+String.format("%.7f", simulateur.calculTauxErreurBinaire());
+                System.out.println(ligne);
+                listeCSV.add(ligne);
+                }
     	}
     	catch (Exception e) {
     		System.out.println(e); 
